@@ -25,8 +25,9 @@ def create_product(current_user):
     product = Product(
         name=data['name'],
         price=data['price'],
-        description=data['description']
+        description=data['description'],
+        image_url=data.get('image_url')
     )
     db.session.add(product)
     db.session.commit()
-    return jsonify({'message': 'Product created', 'id': product.id}), 201
+    return jsonify({'message': 'Товар добавлен', 'id': product.id}), 201
