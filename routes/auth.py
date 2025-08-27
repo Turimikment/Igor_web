@@ -1,7 +1,9 @@
+#routes/auth.py
 from flask import Blueprint, jsonify, request, render_template
 from models import User, db
 from werkzeug.security import generate_password_hash, check_password_hash
 import re
+from jwt_utils import create_jwt_token  # Добавляем импорт
 
 auth_bp = Blueprint('auth', __name__)
 
