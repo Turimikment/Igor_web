@@ -3,12 +3,13 @@ from flask_sqlalchemy import SQLAlchemy
 from flasgger import Swagger
 from config import Config
 from models import db
+from models import User, Product, db  # Добавляем импорт моделей
 from routes.auth import auth_bp
 from routes.products import products_bp
 from routes.favorites import favorites_bp
-from auth import token_required
-import atexit
 from routes.cart import cart_bp
+from jwt_utils import create_jwt_token  # Добавляем импорт
+import atexit
 
 app = Flask(__name__)
 app.config.from_object(Config)
