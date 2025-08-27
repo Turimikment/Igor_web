@@ -1,9 +1,10 @@
-# auth.py
-from functools import wraps
-from models import User
-from config import Config
-import jwt
-from datetime import datetime, timedelta
+from flask import Blueprint, jsonify, request, render_template
+from models import User, db
+from werkzeug.security import generate_password_hash, check_password_hash
+import re
+from jwt_utils import create_jwt_token  # Добавляем импорт
+
+auth_bp = Blueprint('auth', __name__)
 
 def create_jwt_token(user_id):
     payload = {
