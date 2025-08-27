@@ -1,58 +1,38 @@
-# routes/auth.py
-from flask import Blueprint, jsonify, request, render_template
-from models import User, db
-from werkzeug.security import generate_password_hash
-import re
+# auth.py
+from functools import wraps
+from models import User
+from config import Config
+import jwt
+from datetime import datetime, timedelta
 
-auth_bp = Blueprint('auth', __name__)
+def create_jwt_token(user_id):
+    payload = {
+        'user_id': user_id,
+        'exp': datetime.utcnow() + timedelta(hours=1),
+        'iat': datetime.utcnow()
+    }
+    return jwt.encode(payload, Config.JWT_SECRET_KEY, algorithm='HS256')
 
-def is_valid_email(email):
-    return re.match(r'^[^@]+@[^@]+\.[^@]+$', email)
+def verify_token(token):
+    try:
+        payload = jwt.decode(token, Config.JWT_SECRET_KEY, algorithms=['HS256'])
+        return payload['user_id']
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+        return None
 
-def is_valid_password(password):
-    return len(password) >= 6  # Можно усилить: цифры, символы и т.д.
-
-@auth_bp.route('/register', methods=['GET'])
-def register_page():
-    return render_template('register.html')
-
-@auth_bp.route('/api/register', methods=['POST'])
-def register():
-    data = request.json
-
-    username = data.get('username')
-    email = data.get('email')
-    password = data.get('password')
-
-    # Валидация
-    if not username or not email or not password:
-        return jsonify({'message': 'Все поля обязательны'}), 400
-
-    if not is_valid_email(email):
-        return jsonify({'message': 'Некорректный email'}), 400
-
-    if not is_valid_password(password):
-        return jsonify({'message': 'Пароль должен быть не менее 6 символов'}), 400
-
-    if User.query.filter_by(username=username).first():
-        return jsonify({'message': 'Пользователь с таким логином уже существует'}), 400
-
-    if User.query.filter_by(email=email).first():
-        return jsonify({'message': 'Пользователь с таким email уже существует'}), 400
-
-    # Хэшируем пароль
-    hashed_password = generate_password_hash(password)
-
-    # Создаём пользователя
-    user = User(
-        username=username,
-        email=email,
-        password_hash=hashed_password,
-        salt="",  # В реальности — генерируй соль отдельно
-        is_active=True
-    )
-
-    db.session.add(user)
-    db.session.commit()
-
-    return jsonify({'message': 'Регистрация успешна'}), 201
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get('Authorization')
+        if not token:
+            return jsonify({'message': 'Токен отсутствует'}), 401
+        if token.startswith('Bearer '):
+            token = token[7:]
+        user_id = verify_token(token)
+        if not user_id:
+            return jsonify({'message': 'Неверный или просроченный токен'}), 401
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'message': 'Пользователь не найден'}), 401
+        return f(user, *args, **kwargs)
+    return decorated
