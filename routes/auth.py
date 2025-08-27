@@ -1,3 +1,4 @@
+#routes/favorites.py
 from flask import Blueprint, jsonify, request, render_template
 from models import User, db
 from werkzeug.security import generate_password_hash, check_password_hash
