@@ -8,6 +8,7 @@ from routes.products import products_bp
 from routes.favorites import favorites_bp
 from auth import token_required
 import atexit
+from routes.cart import cart_bp
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -18,7 +19,7 @@ swagger = Swagger(app)
 app.register_blueprint(auth_bp)
 app.register_blueprint(products_bp, url_prefix='/api')
 app.register_blueprint(favorites_bp, url_prefix='/api')
-
+app.register_blueprint(cart_bp, url_prefix='/api')
 # === Инициализация БД ===
 def init_database():
     with app.app_context():
