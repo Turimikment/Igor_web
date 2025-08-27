@@ -1,3 +1,4 @@
+#routes/products.py
 from flask import Blueprint, jsonify, request
 from models import Product, db
 from auth import token_required
