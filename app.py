@@ -1,20 +1,18 @@
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
-from flasgger import Swagger
 from config import Config
-from models import db, User, Product  # Добавляем импорт моделей
+from models import db, User, Product
 from routes.auth import auth_bp
 from routes.products import products_bp
 from routes.favorites import favorites_bp
 from routes.cart import cart_bp
-from jwt_utils import create_jwt_token  # Добавляем импорт
+from jwt_utils import create_jwt_token
 import atexit
 import os
 
 app = Flask(__name__)
 app.config.from_object(Config)
 db.init_app(app)
-swagger = Swagger(app)
 
 # Регистрация blueprint'ов
 app.register_blueprint(auth_bp)
