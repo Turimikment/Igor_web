@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Избранное</h2>
+<div id="favorites-list">
+    <p>Загрузка избранного...</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/api/favorites', {
+            headers: {
+                'Authorization': 'Bearer ' + getCookie('access_token')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const favoritesContainer = document.getElementById('favorites-list');
+            
+            if (data.length === 0) {
+                favoritesContainer.innerHTML = '<p>У вас нет избранных товаров</p>';
+                return;
+            }
+            
+            let html = '<div class="favorites-grid">';
+            
+            data.forEach(item => {
+                html += `
+                <div class="product-card">
+                    <img src="${item.product.image_url}" alt="${item.product.name}">
+                    <h3>${item.product.name}</h3>
+                    <p class="product-price">$${item.product.price}</p>
+                    <div class="product-actions">
+                        <button class="btn-add-cart" data-product-id="${item.product.id}">В корзину</button>
+                    </div>
+                </div>
+                `;
+            });
+            
+            html += '</div>';
+            favoritesContainer.innerHTML = html;
+            
+            // Добавляем обработчики событий для кнопок
+            document.querySelectorAll('.btn-add-cart').forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = this.getAttribute('data-product-id');
+                    addToCart(productId);
+                });
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('favorites-list').innerHTML = '<p>Ошибка загрузки избранного</p>';
+        });
+    });
+</script>
+{% endblock %}
