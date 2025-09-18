@@ -1,0 +1,34 @@
+ {% extends "base.html" %}
+
+{% block content %}
+<div class="hero">
+    <h1>Добро пожаловать в наш магазин!</h1>
+    <p>Лучшие товары по лучшим ценам</p>
+</div>
+
+<div class="products-header">
+    <h2>Наши товары</h2>
+    <div class="category-filter">
+        <button class="filter-btn active" data-category="all">Все</button>
+        <button class="filter-btn" data-category="Electronics">Электроника</button>
+        <button class="filter-btn" data-category="Computers">Компьютеры</button>
+        <button class="filter-btn" data-category="Clothing">Одежда</button>
+        <button class="filter-btn" data-category="Books">Книги</button>
+    </div>
+</div>
+
+<div class="products-grid">
+    {% for product in products %}
+    <div class="product-card" data-category="{{ product.category }}">
+        <img src="{{ product.image_url }}" alt="{{ product.name }}">
+        <h3>{{ product.name }}</h3>
+        <p class="product-description">{{ product.description }}</p>
+        <p class="product-price">${{ product.price }}</p>
+        <div class="product-actions">
+            <button class="btn-add-cart" data-product-id="{{ product.id }}">В корзину</button>
+            <button class="btn-add-favorite" data-product-id="{{ product.id }}">❤️</button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
