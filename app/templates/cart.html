@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Корзина</h2>
+<div id="cart-items">
+    <p>Загрузка корзины...</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/api/cart', {
+            headers: {
+                'Authorization': 'Bearer ' + getCookie('access_token')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const cartContainer = document.getElementById('cart-items');
+            
+            if (data.length === 0) {
+                cartContainer.innerHTML = '<p>Ваша корзина пуста</p>';
+                return;
+            }
+            
+            let html = '<div class="cart-list">';
+            let total = 0;
+            
+            data.forEach(item => {
+                const itemTotal = item.product.price * item.quantity;
+                total += itemTotal;
+                
+                html += `
+                <div class="cart-item">
+                    <img src="${item.product.image_url}" alt="${item.product.name}">
+                    <div class="cart-item-info">
+                        <h3>${item.product.name}</h3>
+                        <p>Цена: $${item.product.price}</p>
+                        <p>Количество: ${item.quantity}</p>
+                        <p>Итого: $${itemTotal.toFixed(2)}</p>
+                    </div>
+                </div>
+                `;
+            });
+            
+            html += `
+                <div class="cart-total">
+                    <h3>Общая сумма: $${total.toFixed(2)}</h3>
+                </div>
+            </div>
+            `;
+            
+            cartContainer.innerHTML = html;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('cart-items').innerHTML = '<p>Ошибка загрузки корзины</p>';
+        });
+    });
+</script>
+{% endblock %}
