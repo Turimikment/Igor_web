@@ -34,3 +34,10 @@ class Favorite(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+
+def init_db():
+    from app import create_app, db
+    app = create_app()
+    with app.app_context():
+        db.create_all()
+        print("Database tables created")
