@@ -1,13 +1,20 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
+import os
 
 db = SQLAlchemy()
 jwt = JWTManager()
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object('app.config.Config')
+    
+    # Определяем окружение
+    env = os.getenv('FLASK_ENV', 'development')
+    if env == 'production':
+        app.config.from_object('app.config.ProductionConfig')
+    else:
+        app.config.from_object('app.config.DevelopmentConfig')
     
     db.init_app(app)
     jwt.init_app(app)
